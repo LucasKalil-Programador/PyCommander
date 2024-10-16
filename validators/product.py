@@ -3,6 +3,8 @@ import re
 from flask import request, jsonify
 
 
+# region require
+
 def require_name(func):
     def wrapper(*args, **kwargs):
         name = request.json.get('name')
@@ -51,22 +53,6 @@ def require_stock(func):
     return wrapper
 
 
-def optional_description(func):
-    def wrapper(*args, **kwargs):
-        description = request.json.get('description', '')
-
-        if not isinstance(description, str):
-            return jsonify(error=f"Invalid description type, expected string got {type(description)}."), 401
-
-        if not re.fullmatch(r"^[\w\s]{0,255}$", description):
-            return jsonify(error="Invalid description format."), 401
-
-        return func(*args, **kwargs)
-
-    wrapper.__name__ = func.__name__
-    return wrapper
-
-
 def required_category(func):
     def wrapper(*args, **kwargs):
         category = request.json.get('category')
@@ -83,15 +69,95 @@ def required_category(func):
     return wrapper
 
 
-def optional_category(func):
+def require_id(func):
     def wrapper(*args, **kwargs):
-        category = request.json.get('category', '')
+        pid = request.json.get('id')
 
-        if not isinstance(category, str):
-            return jsonify(error=f"Invalid category type, expected string got {type(category)}."), 401
+        if not isinstance(pid, int):
+            return jsonify(error=f"Invalid id type, expected int got {type(pid)}."), 401
 
-        if not re.fullmatch(r"^[\w\s]{0,255}$", category):
-            return jsonify(error="Invalid category format."), 401
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def require_kg_price_id(func):
+    def wrapper(*args, **kwargs):
+        kg_price_id = request.json.get('kg_price_id')
+
+        if not isinstance(kg_price_id, int):
+            return jsonify(error=f"Invalid kg_price_id type, expected int got {type(kg_price_id)}."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def require_weight(func):
+    def wrapper(*args, **kwargs):
+        weight = request.json.get('weight')
+
+        if not isinstance(weight, float):
+            return jsonify(error=f"Invalid weight type, expected float got {type(weight)}."), 401
+
+        if weight <= 0:
+            return jsonify(error="weight must be greater than zero."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+# endregion
+
+# region optional
+
+def optional_weight(func):
+    def wrapper(*args, **kwargs):
+        weight = request.json.get('weight')
+        if weight is None:
+            return func(*args, **kwargs)
+
+        if not isinstance(weight, float):
+            return jsonify(error=f"Invalid weight type, expected float got {type(weight)}."), 401
+
+        if weight <= 0:
+            return jsonify(error="weight must be greater than zero."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def optional_name(func):
+    def wrapper(*args, **kwargs):
+        name = request.json.get('name')
+        if name is None:
+            return func(*args, **kwargs)
+        if not isinstance(name, str):
+            return jsonify(error=f"Invalid name type, expected string got {type(name)}."), 401
+
+        if not re.fullmatch(r"^[\w\s]{1,255}$", name):
+            return jsonify(error="Invalid name format."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def optional_kg_price_id(func):
+    def wrapper(*args, **kwargs):
+        kg_price_id = request.json.get('kg_price_id')
+        if kg_price_id is None:
+            return func(*args, **kwargs)
+
+        if not isinstance(kg_price_id, int):
+            return jsonify(error=f"Invalid kg_price_id type, expected int got {type(kg_price_id)}."), 401
 
         return func(*args, **kwargs)
 
@@ -115,12 +181,15 @@ def optional_active(func):
     return wrapper
 
 
-def require_id(func):
+def optional_category(func):
     def wrapper(*args, **kwargs):
-        pid = request.json.get('id')
+        category = request.json.get('category', '')
 
-        if not isinstance(pid, int):
-            return jsonify(error=f"Invalid id type, expected int got {type(pid)}."), 401
+        if not isinstance(category, str):
+            return jsonify(error=f"Invalid category type, expected string got {type(category)}."), 401
+
+        if not re.fullmatch(r"^[\w\s]{0,255}$", category):
+            return jsonify(error="Invalid category format."), 401
 
         return func(*args, **kwargs)
 
@@ -128,17 +197,71 @@ def require_id(func):
     return wrapper
 
 
-def require_weight(func):
+def optional_stock(func):
     def wrapper(*args, **kwargs):
-        weight = request.json.get('weight')
+        stock = request.json.get('stock')
+        if stock is None:
+            return func(*args, **kwargs)
 
-        if not isinstance(weight, float):
-            return jsonify(error=f"Invalid weight type, expected float got {type(weight)}."), 401
+        if not isinstance(stock, int):
+            return jsonify(error=f"Invalid stock type, expected int got {type(stock)}."), 401
 
-        if weight <= 0:
-            return jsonify(error="weight must be greater than zero."), 401
+        if stock < 0:
+            return jsonify(error="Order number must be greater o equals zero."), 401
 
         return func(*args, **kwargs)
 
     wrapper.__name__ = func.__name__
     return wrapper
+
+
+def optional_quantity(func):
+    def wrapper(*args, **kwargs):
+        quantity = request.json.get('quantity', 1)
+
+        if not isinstance(quantity, int):
+            return jsonify(error=f"Invalid quantity type, expected int got {type(quantity)}."), 401
+
+        if quantity <= 0:
+            return jsonify(error="quantity must be greater than zero."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def optional_description(func):
+    def wrapper(*args, **kwargs):
+        description = request.json.get('description', '')
+
+        if not isinstance(description, str):
+            return jsonify(error=f"Invalid description type, expected string got {type(description)}."), 401
+
+        if not re.fullmatch(r"^[\w\s]{0,255}$", description):
+            return jsonify(error="Invalid description format."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def optional_price(func):
+    def wrapper(*args, **kwargs):
+        price = request.json.get('price')
+        if price is None:
+            return func(*args, **kwargs)
+
+        if not isinstance(price, float):
+            return jsonify(error=f"Invalid price type, expected float got {type(price)}."), 401
+
+        if price <= 0:
+            return jsonify(error="price must be greater than zero."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+# endregion
