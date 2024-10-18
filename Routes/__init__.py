@@ -1,0 +1,5 @@
+from Routes.product_route import product_blueprint
+from Routes.kg_price_route import kg_price_blueprint
+from Routes.order_route import order_blueprint
+from Routes.product_per_kg_route import product_per_kg_blueprint
+from Routes.auth_route import auth_blueprint
