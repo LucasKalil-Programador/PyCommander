@@ -1,10 +1,10 @@
 import re
-
 from flask import request, jsonify
 
 
 # region require
 
+# Ensures 'name' is a string and matches a specific format (1-255 alphanumeric characters)
 def require_name(func):
     def wrapper(*args, **kwargs):
         name = request.json.get('name')
@@ -21,6 +21,7 @@ def require_name(func):
     return wrapper
 
 
+# Ensures 'price' is a float and greater than zero
 def require_price(func):
     def wrapper(*args, **kwargs):
         price = request.json.get('price')
@@ -37,6 +38,7 @@ def require_price(func):
     return wrapper
 
 
+# Ensures 'stock' is an integer and greater or equal to zero
 def require_stock(func):
     def wrapper(*args, **kwargs):
         stock = request.json.get('stock')
@@ -45,7 +47,7 @@ def require_stock(func):
             return jsonify(error=f"Invalid stock type, expected int got {type(stock)}."), 401
 
         if stock < 0:
-            return jsonify(error="Order number must be greater o equals zero."), 401
+            return jsonify(error="Stock must be greater or equal to zero."), 401
 
         return func(*args, **kwargs)
 
@@ -53,6 +55,7 @@ def require_stock(func):
     return wrapper
 
 
+# Ensures 'category' is a string and matches a specific format (1-255 alphanumeric characters)
 def required_category(func):
     def wrapper(*args, **kwargs):
         category = request.json.get('category')
@@ -69,6 +72,7 @@ def required_category(func):
     return wrapper
 
 
+# Ensures 'id' is an integer
 def require_id(func):
     def wrapper(*args, **kwargs):
         pid = request.json.get('id')
@@ -82,6 +86,7 @@ def require_id(func):
     return wrapper
 
 
+# Ensures 'kg_price_id' is an integer
 def require_kg_price_id(func):
     def wrapper(*args, **kwargs):
         kg_price_id = request.json.get('kg_price_id')
@@ -95,6 +100,7 @@ def require_kg_price_id(func):
     return wrapper
 
 
+# Ensures 'weight' is a float and greater than zero
 def require_weight(func):
     def wrapper(*args, **kwargs):
         weight = request.json.get('weight')
@@ -103,7 +109,7 @@ def require_weight(func):
             return jsonify(error=f"Invalid weight type, expected float got {type(weight)}."), 401
 
         if weight <= 0:
-            return jsonify(error="weight must be greater than zero."), 401
+            return jsonify(error="Weight must be greater than zero."), 401
 
         return func(*args, **kwargs)
 
@@ -115,6 +121,7 @@ def require_weight(func):
 
 # region optional
 
+# Ensures 'weight', if provided, is a valid float greater than zero
 def optional_weight(func):
     def wrapper(*args, **kwargs):
         weight = request.json.get('weight')
@@ -125,7 +132,7 @@ def optional_weight(func):
             return jsonify(error=f"Invalid weight type, expected float got {type(weight)}."), 401
 
         if weight <= 0:
-            return jsonify(error="weight must be greater than zero."), 401
+            return jsonify(error="Weight must be greater than zero."), 401
 
         return func(*args, **kwargs)
 
@@ -133,6 +140,7 @@ def optional_weight(func):
     return wrapper
 
 
+# Ensures 'name', if provided, is a string and matches a specific format (1-255 alphanumeric characters)
 def optional_name(func):
     def wrapper(*args, **kwargs):
         name = request.json.get('name')
@@ -150,6 +158,7 @@ def optional_name(func):
     return wrapper
 
 
+# Ensures 'kg_price_id', if provided, is a valid integer
 def optional_kg_price_id(func):
     def wrapper(*args, **kwargs):
         kg_price_id = request.json.get('kg_price_id')
@@ -165,6 +174,7 @@ def optional_kg_price_id(func):
     return wrapper
 
 
+# Ensures 'active' is a boolean, defaults to False
 def optional_active(func):
     def wrapper(*args, **kwargs):
         active = request.json.get('active', False)
@@ -172,15 +182,13 @@ def optional_active(func):
         if not isinstance(active, bool):
             return jsonify(error=f"Invalid active type, expected bool got {type(active)}."), 401
 
-        if active not in [True, False]:
-            return jsonify(error="Active must be a boolean."), 401
-
         return func(*args, **kwargs)
 
     wrapper.__name__ = func.__name__
     return wrapper
 
 
+# Ensures 'category', if provided, is a string and matches a specific format (0-255 alphanumeric characters)
 def optional_category(func):
     def wrapper(*args, **kwargs):
         category = request.json.get('category', '')
@@ -197,6 +205,7 @@ def optional_category(func):
     return wrapper
 
 
+# Ensures 'stock', if provided, is an integer and greater or equal to zero
 def optional_stock(func):
     def wrapper(*args, **kwargs):
         stock = request.json.get('stock')
@@ -207,7 +216,7 @@ def optional_stock(func):
             return jsonify(error=f"Invalid stock type, expected int got {type(stock)}."), 401
 
         if stock < 0:
-            return jsonify(error="Order number must be greater o equals zero."), 401
+            return jsonify(error="Stock must be greater or equal to zero."), 401
 
         return func(*args, **kwargs)
 
@@ -215,6 +224,7 @@ def optional_stock(func):
     return wrapper
 
 
+# Ensures 'quantity', if provided, is a valid integer greater than zero (defaults to 1)
 def optional_quantity(func):
     def wrapper(*args, **kwargs):
         quantity = request.json.get('quantity', 1)
@@ -223,7 +233,7 @@ def optional_quantity(func):
             return jsonify(error=f"Invalid quantity type, expected int got {type(quantity)}."), 401
 
         if quantity <= 0:
-            return jsonify(error="quantity must be greater than zero."), 401
+            return jsonify(error="Quantity must be greater than zero."), 401
 
         return func(*args, **kwargs)
 
@@ -231,6 +241,7 @@ def optional_quantity(func):
     return wrapper
 
 
+# Ensures 'description', if provided, is a string and matches a specific format (0-255 alphanumeric characters)
 def optional_description(func):
     def wrapper(*args, **kwargs):
         description = request.json.get('description', '')
@@ -247,6 +258,7 @@ def optional_description(func):
     return wrapper
 
 
+# Ensures 'price', if provided, is a valid float greater than zero
 def optional_price(func):
     def wrapper(*args, **kwargs):
         price = request.json.get('price')
@@ -257,7 +269,7 @@ def optional_price(func):
             return jsonify(error=f"Invalid price type, expected float got {type(price)}."), 401
 
         if price <= 0:
-            return jsonify(error="price must be greater than zero."), 401
+            return jsonify(error="Price must be greater than zero."), 401
 
         return func(*args, **kwargs)
 

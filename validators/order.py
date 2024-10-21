@@ -1,10 +1,10 @@
 import re
-
 from flask import request, jsonify
 
 from database import PaymentMethod
 
 
+# Ensures 'order_number' is a valid integer (> 0)
 def require_number(func):
     def wrapper(*args, **kwargs):
         number = request.json.get('order_number')
@@ -21,6 +21,7 @@ def require_number(func):
     return wrapper
 
 
+# Ensures 'order_id' is an integer
 def require_order_id(func):
     def wrapper(*args, **kwargs):
         order_id = request.json.get('order_id')
@@ -34,6 +35,7 @@ def require_order_id(func):
     return wrapper
 
 
+# Ensures 'payment_method' is a valid string and matches a payment method
 def require_payment(func):
     def wrapper(*args, **kwargs):
         payment = request.json.get('payment_method')
@@ -50,6 +52,7 @@ def require_payment(func):
     return wrapper
 
 
+# Ensures 'note' is an optional string up to 255 alphanumeric characters
 def optional_note(func):
     def wrapper(*args, **kwargs):
         note = request.json.get('note', '')
@@ -66,6 +69,7 @@ def optional_note(func):
     return wrapper
 
 
+# Ensures 'product_id', if provided, is an integer
 def optional_product_id(func):
     def wrapper(*args, **kwargs):
         product_id = request.json.get('product_id')
@@ -81,6 +85,7 @@ def optional_product_id(func):
     return wrapper
 
 
+# Ensures 'product_per_kg_id', if provided, is an integer
 def optional_product_per_kg_id(func):
     def wrapper(*args, **kwargs):
         product_per_kg_id = request.json.get('product_per_kg_id')

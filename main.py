@@ -32,11 +32,12 @@ def get_app():
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS")))
     jwt = JWTManager(app)
 
-    app.register_blueprint(product_blueprint, url_prefix="/product")
-    app.register_blueprint(kg_price_blueprint, url_prefix="/kg_price")
-    app.register_blueprint(order_blueprint, url_prefix="/order")
+    app.register_blueprint(product_blueprint,        url_prefix="/product")
+    app.register_blueprint(kg_price_blueprint,       url_prefix="/kg_price")
+    app.register_blueprint(order_blueprint,          url_prefix="/order")
     app.register_blueprint(product_per_kg_blueprint, url_prefix="/per_kg_product")
-    app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    app.register_blueprint(auth_blueprint,           url_prefix="/auth")
+    app.register_blueprint(statistics_blueprint,     url_prefix="/statistics")
     return app
 
 
