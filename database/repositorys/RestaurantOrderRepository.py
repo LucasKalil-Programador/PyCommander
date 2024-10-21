@@ -109,6 +109,54 @@ class RestaurantOrderRepository:
         finally:
             cursor.close()
 
+    def select_all_open_paged(self, limit: int, offset: int):
+        cursor = self.db.conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT ID, Number, Entry_Time, Exit_Time, Status, Note, Payment_Method, Total_Amount, Paid
+                FROM RestaurantOrder WHERE Status = 'Open' LIMIT ? OFFSET ?
+            """, (limit, offset))
+            for row in cursor:
+                yield RestaurantOrder(
+                    id=row[0],
+                    number=row[1],
+                    entry_time=row[2],
+                    exit_time=row[3],
+                    status=row[4],
+                    note=row[5],
+                    payment_method=row[6],
+                    total_amount=row[7],
+                    paid=row[8]
+                )
+        except mariadb.Error as e:
+            print(f"Error fetching all orders: {e}")
+        finally:
+            cursor.close()
+
+    def select_all_close_paged(self, limit: int, offset: int):
+        cursor = self.db.conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT ID, Number, Entry_Time, Exit_Time, Status, Note, Payment_Method, Total_Amount, Paid
+                FROM RestaurantOrder WHERE Status = 'Closed' LIMIT ? OFFSET ?
+            """, (limit, offset))
+            for row in cursor:
+                yield RestaurantOrder(
+                    id=row[0],
+                    number=row[1],
+                    entry_time=row[2],
+                    exit_time=row[3],
+                    status=row[4],
+                    note=row[5],
+                    payment_method=row[6],
+                    total_amount=row[7],
+                    paid=row[8]
+                )
+        except mariadb.Error as e:
+            print(f"Error fetching all orders: {e}")
+        finally:
+            cursor.close()
+
     def delete_by_id(self, order_id: int) -> bool:
         cursor = self.db.conn.cursor()
         try:
@@ -175,7 +223,7 @@ class RestaurantOrderRepository:
             row = cursor.fetchone()
 
             if row:
-                return row[0]
+                return row[0] if row[0] is not None else 0
             return None
         except mariadb.Error as e:
             print(f"Error fetching order by ID: {e}")

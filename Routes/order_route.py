@@ -4,12 +4,15 @@ from flask import jsonify, request, Blueprint
 
 from database import *
 from utils import HttpStatus, role_required
-from validators import order, product
+from validators import order, product, utils
 
-# /order/checkin  POST   ADMIN, CASHIER, WAITER
-# /order/add_item POST   ADMIN, CASHIER, WAITER
-# /order/total    GET    ADMIN, CASHIER, WAITER
-# /order/items    GET    ADMIN, CASHIER, WAITER, COOK
+# /order/checkin       POST   ADMIN, CASHIER, WAITER
+# /order/add_item      POST   ADMIN, CASHIER, WAITER
+# /order/checkout      POST   ADMIN, CASHIER, WAITER
+# /order/total         GET    ADMIN, CASHIER, WAITER
+# /order/items         GET    ADMIN, CASHIER, WAITER, COOK
+# /order/open_orders   GET    ADMIN, CASHIER, WAITER, COOK
+# /order/closed_orders GET    ADMIN, CASHIER, WAITER, COOK
 
 order_blueprint = Blueprint('order', __name__)
 
@@ -41,6 +44,32 @@ def checkin():
 
     # if insertion fail
     return jsonify(error="Failed to create the order."), 500
+
+
+@order_blueprint.route('/checkout', methods=['POST'])
+@order.require_number
+@order.require_payment
+@order.optional_note
+@role_required(db, [UserRole.ADMIN, UserRole.CASHIER, UserRole.WAITER])
+def checkout():
+    r_order = db.restaurant_order_repository.select_by_number_open(request.json.get('order_number'))
+    if r_order is None:
+        return jsonify(error="order number not found"), HttpStatus.NOT_FOUND.value
+
+    r_order.payment_method = PaymentMethod(request.json.get('payment_method'))
+    r_order.note = request.json.get('note', r_order.note)
+    r_order.status = OrderStatus.CLOSED
+    r_order.exit_time = datetime.now()
+    r_order.paid = True
+
+    r_order.total_amount = db.restaurant_order_repository.calc_total(r_order.id)
+    if r_order.total_amount is None:
+        return jsonify(error="error when calc total"), HttpStatus.NOT_FOUND.value
+
+    if db.restaurant_order_repository.update(r_order):
+        return jsonify(success="Checkout successfully"), HttpStatus.OK.value
+
+    return jsonify(error="Checkout error"), HttpStatus.INTERNAL_SERVER_ERROR.value
 
 
 @order_blueprint.route('/add_item', methods=['POST'])
@@ -112,3 +141,29 @@ def get_order_items():
     total = db.restaurant_order_repository.calc_total(r_order.id)
     return jsonify(success="All order items", total=total,
                    items={"products": products, "products_per_kg": products_per_kg})
+
+
+@order_blueprint.route('/open_orders', methods=['Get'])
+@utils.optional_offset
+@role_required(db, [UserRole.ADMIN, UserRole.CASHIER, UserRole.WAITER, UserRole.COOK])
+def get_order_open_orders():
+    limit = 100
+    offset = request.json.get('offset', 0)
+    products = [p for p in db.restaurant_order_repository.select_all_open_paged(limit=limit, offset=offset)]
+    if len(products) == 100:
+        return jsonify(products=products, next_page_offset=offset + limit, has_next=True), HttpStatus.OK.value
+    else:
+        return jsonify(products=products, has_next=False), HttpStatus.OK.value
+
+
+@order_blueprint.route('/closed_orders', methods=['Get'])
+@utils.optional_offset
+@role_required(db, [UserRole.ADMIN, UserRole.CASHIER, UserRole.WAITER, UserRole.COOK])
+def get_order_close_orders():
+    limit = 100
+    offset = request.json.get('offset', 0)
+    products = [p for p in db.restaurant_order_repository.select_all_close_paged(limit=limit, offset=offset)]
+    if len(products) == 100:
+        return jsonify(products=products, next_page_offset=offset + limit, has_next=True), HttpStatus.OK.value
+    else:
+        return jsonify(products=products, has_next=False), HttpStatus.OK.value

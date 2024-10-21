@@ -4,7 +4,7 @@ from flask import jsonify, request, Blueprint
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 
 from database import *
-from utils import generate_bcrypt_hash, verify_bcrypt_password, role_required
+from utils import generate_bcrypt_hash, verify_bcrypt_password, role_required, HttpStatus
 from validators import user
 
 # /auth/login    POST
@@ -52,9 +52,9 @@ def refresh():
 
 
 @auth_blueprint.route('/register', methods=['POST'])
+@user.require_username
 @user.require_name
 @user.require_email
-@user.require_username
 @user.require_password
 @user.require_active
 @user.require_user_role
@@ -83,3 +83,72 @@ def register_user():
 
     # if insertion fail
     return jsonify(error="User registration failed."), 500
+
+
+@auth_blueprint.route('/edit', methods=['POST'])
+@user.require_username
+@user.optional_new_username
+@user.optional_name
+@user.optional_email
+@user.optional_password
+@user.optional_active
+@user.optional_user_role
+@role_required(db, [UserRole.ADMIN])
+def edit_user():
+    this_user = db.user_repository.select_by_username(request.json.get('username'))
+
+    password = request.json.get('password', None)
+    password_hash = this_user.password_hash
+    if password is not None:
+        password_hash = generate_bcrypt_hash(password)
+
+    new_user = User(
+        id=this_user.id,
+        name=request.json.get('name', this_user.name),
+        email=request.json.get('email', this_user.email),
+        username=request.json.get('new_username', this_user.username),
+        password_hash=password_hash,
+        active=request.json.get('active', this_user.active),
+        role=UserRole(request.json.get('user_role', this_user.role))
+    )
+
+    # if new_user equals old_user
+    if this_user == new_user:
+        return jsonify(error="Update not have any changes."), HttpStatus.CONFLICT.value
+
+    # if email exist
+    if this_user.email != new_user.email and db.user_repository.email_exists(new_user.email):
+        return jsonify(error="Email already exists."), 409
+
+    # try insert
+    if db.user_repository.update(new_user):
+        return jsonify(success="User edited successfully."), HttpStatus.OK.value
+
+    if this_user.username != new_user.username or this_user.password_hash != new_user.password_hash:
+        db.jwt_list_repository.delete_by_user_id(this_user.id)
+
+    # if insertion fail
+    return jsonify(error="User edition failed."), 500
+
+
+@auth_blueprint.route('/delete', methods=['DELETE'])
+@user.require_username
+@role_required(db, [UserRole.ADMIN])
+def delete_user():
+    username = request.json.get('username')
+    temp_user = db.user_repository.select_by_username(username)
+
+    if temp_user is None:
+        return jsonify(success="User not found."), HttpStatus.NOT_FOUND.value
+
+    if db.user_repository.delete_by_id(temp_user.id):
+        return jsonify(success="User delete successfully."), HttpStatus.OK.value
+
+    return jsonify(error="User delete error"), HttpStatus.INTERNAL_SERVER_ERROR.value
+
+
+@auth_blueprint.route('/get', methods=['GET'])
+@role_required(db, [UserRole.ADMIN])
+def get_users():
+    users = [{"name": u.name, "username": u.username, "email": u.email, "role": u.role.value, "active": u.active} for u in db.user_repository.select_all()]
+    return jsonify(success="Success retrieve all users", users=users), HttpStatus.OK.value

@@ -137,7 +137,7 @@ class UserRepository:
         try:
             cursor.execute("""
                         SELECT EXISTS (SELECT 1 FROM User WHERE Username = ?)
-                    """, (username, ))
+                    """, (username,))
             row = cursor.fetchone()
             return bool(row[0])
         except mariadb.Error as e:
@@ -151,7 +151,7 @@ class UserRepository:
         try:
             cursor.execute("""
                         SELECT EXISTS (SELECT 1 FROM User WHERE Email = ?)
-                    """, (email, ))
+                    """, (email,))
             row = cursor.fetchone()
             return bool(row[0])
         except mariadb.Error as e:

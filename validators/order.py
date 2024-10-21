@@ -2,6 +2,8 @@ import re
 
 from flask import request, jsonify
 
+from database import PaymentMethod
+
 
 def require_number(func):
     def wrapper(*args, **kwargs):
@@ -25,6 +27,22 @@ def require_order_id(func):
 
         if not isinstance(order_id, int):
             return jsonify(error=f"Invalid order_id type, expected int got {type(order_id)}."), 401
+
+        return func(*args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+def require_payment(func):
+    def wrapper(*args, **kwargs):
+        payment = request.json.get('payment_method')
+
+        if not isinstance(payment, str):
+            return jsonify(error=f"Invalid payment_method type, expected string got {type(payment)}."), 401
+
+        if payment not in [r.value for r in PaymentMethod]:
+            return jsonify(error="Invalid payment method."), 401
 
         return func(*args, **kwargs)
 
