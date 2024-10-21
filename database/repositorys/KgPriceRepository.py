@@ -1,9 +1,34 @@
+"""
+kg_price_repository.py
+
+This module provides the `KgPriceRepository` class for managing kg price records
+in a MariaDB database. It offers methods to insert, select, update, delete,
+and check the existence of kg price records.
+
+Classes:
+    KgPriceRepository: A repository for CRUD operations on KgPrice records.
+"""
 import mariadb
 
 from database import KgPrice
 
 
 class KgPriceRepository:
+    """
+        A repository for managing KgPrice records in a MariaDB database.
+
+        Attributes:
+            db: A database connection instance.
+
+        Methods:
+            insert(kg_price: KgPrice) -> bool: Inserts a new kg price into the database.
+            select_by_id(kg_price_id: int) -> KgPrice | None: Retrieves a kg price by its ID.
+            select_all(): Yields all kg prices from the database.
+            select_all_paged(limit: int, offset: int): Yields kg prices with pagination.
+            delete_by_id(kg_price_id: int) -> (bool, int): Deletes a kg price by its ID.
+            update(kg_price: KgPrice) -> bool: Updates an existing kg price in the database.
+            exists_by_id(kg_price_id: int) -> bool: Checks if a kg price exists by its ID.
+    """
     def __init__(self, db):
         self.db = db
 

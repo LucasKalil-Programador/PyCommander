@@ -1,9 +1,25 @@
+"""
+jwt_repository.py
+
+This module provides a repository for managing JSON Web Token (JWT) items in a MariaDB database.
+
+Classes:
+    JWTListRepository: Handles CRUD operations for JWT items in the `JWTList` table.
+"""
 import mariadb
 
 from database import JWTItem
 
 
 class JWTListRepository:
+    """
+        A repository for managing JWT items in a database.
+
+        Methods:
+            insert(jwt: JWTItem) -> bool: Inserts a new JWT item into the database.
+            exists_by_jti(jti: str) -> bool: Checks if a JWT with the specified JTI exists.
+            delete_by_user_id(user_id: int) -> bool: Deletes JWT items associated with a given user ID.
+    """
     def __init__(self, db):
         self.db = db
 

@@ -1,9 +1,37 @@
+"""
+Module for managing restaurant orders in a database using MariaDB.
+
+This module contains the `RestaurantOrderRepository` class, which provides
+methods to insert, update, delete, and retrieve restaurant orders from
+the database. It also includes functionality for calculating total amounts
+for orders and checking the existence of open orders by their number.
+"""
 import mariadb
 
 from database import RestaurantOrder
 
 
 class RestaurantOrderRepository:
+    """
+        A repository class for performing CRUD operations on restaurant orders.
+
+        Attributes:
+            db: A database connection object.
+
+        Methods:
+            insert(order: RestaurantOrder) -> bool: Inserts a new order into the database.
+            select_by_id(order_id: int) -> RestaurantOrder | None: Retrieves an order by its ID.
+            select_by_number_open(number: int) -> RestaurantOrder | None: Retrieves an open order by its number.
+            select_all() -> Generator[RestaurantOrder, None, None]: Yields all orders in the database.
+            select_all_open_paged(limit: int, offset: int) -> Generator[RestaurantOrder, None, None]:
+                Yields open orders with pagination.
+            select_all_close_paged(limit: int, offset: int) -> Generator[RestaurantOrder, None, None]:
+                Yields closed orders with pagination.
+            delete_by_id(order_id: int) -> bool: Deletes an order by its ID.
+            update(order: RestaurantOrder) -> bool: Updates an existing order in the database.
+            exists_number_open(number: int) -> bool: Checks if an open order exists by its number.
+            calc_total(order_id: int) -> float | None: Calculates the total amount for a specific order.
+    """
     def __init__(self, db):
         self.db = db
 

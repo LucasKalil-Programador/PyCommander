@@ -1,9 +1,38 @@
+"""
+Module for managing database connections and operations for a restaurant management system.
+
+This module defines the DB class, which establishes a connection to a MariaDB database and
+creates the necessary tables for managing restaurant orders, products, users, and JSON Web Tokens (JWTs).
+"""
 import mariadb
 
 from database.repositorys import *
 
 
 class DB:
+    """Database connection and management class for a restaurant management system.
+
+        This class handles the connection to a MariaDB database and the creation of necessary
+        tables for storing data related to restaurant orders, products, users, and JWTs.
+
+        Attributes:
+            conn (mariadb.Connection): The connection to the MariaDB database.
+            db_name (str): The name of the database to be created or used.
+
+        Methods:
+            __create_tables(): Creates necessary tables for the restaurant management system
+                               if they do not already exist.
+
+        Properties:
+            restaurant_order_repository: Provides access to the RestaurantOrder repository.
+            user_repository: Provides access to the User repository.
+            product_repository: Provides access to the Product repository.
+            product_per_kg_repository: Provides access to the ProductPerKg repository.
+            order_status_history_repository: Provides access to the OrderStatusHistory repository.
+            order_item_repository: Provides access to the OrderItem repository.
+            jwt_list_repository: Provides access to the JWTList repository.
+            kg_price_repository: Provides access to the KgPrice repository.
+    """
     def __init__(self, host_ip: str, port: int, user: str, password: str, db_name: str):
         self.conn = mariadb.connect(host=host_ip, port=port, user=user, password=password)
         self.db_name = db_name

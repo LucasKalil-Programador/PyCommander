@@ -1,9 +1,32 @@
+"""
+Module for managing products sold per kilogram in a database using MariaDB.
+
+This module contains the `ProductPerKgRepository` class, which provides
+methods for performing CRUD operations on products sold by weight.
+It supports inserting, updating, deleting, and retrieving product
+details from the database, including paginated retrieval of products.
+"""
 import mariadb
 
 from database import ProductPerKg
 
 
 class ProductPerKgRepository:
+    """
+        A repository class for managing products sold per kilogram.
+
+        Attributes:
+            db: A database connection object.
+
+        Methods:
+            insert(product_per_kg: ProductPerKg) -> bool: Inserts a new product per kg into the database.
+            select_by_id(product_per_kg_id: int) -> ProductPerKg | None: Retrieves a product per kg by its ID.
+            select_all() -> Generator[ProductPerKg, None, None]: Yields all products per kg in the database.
+            select_all_paged(limit: int, offset: int) -> Generator[ProductPerKg, None, None]:
+                Yields products per kg with pagination.
+            delete_by_id(product_per_kg_id: int) -> (bool, int): Deletes a product per kg by its ID.
+            update(product_per_kg: ProductPerKg) -> bool: Updates an existing product per kg in the database.
+    """
     def __init__(self, db):
         self.db = db
 

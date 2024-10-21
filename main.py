@@ -9,6 +9,27 @@ from utils.security_utils import generate_bcrypt_hash
 
 
 def add_default_user_if_no_users():
+    """
+        Creates a default user in the database if no users exist.
+
+        If the user repository is empty, a default user is created with:
+        - Name: "default"
+        - Username: value of the environment variable `DEFAULT_USER`
+        - Password: hashed value of the environment variable `DEFAULT_PASSWORD`
+        - Email: "default@hotmail.com"
+        - Role: `UserRole.ADMIN`
+        - Active: `True`
+
+        The default user is then inserted into the user repository. A message is printed
+        to inform that the default user has been created, and another user should be made.
+
+        Returns:
+            None: This function does not return a value.
+
+        Notes:
+            - Ensure `DEFAULT_USER` and `DEFAULT_PASSWORD` environment variables are set.
+            - Using a default user may pose security risks in production environments.
+    """
     if db.user_repository.select_all():
         return
 
@@ -25,22 +46,40 @@ def add_default_user_if_no_users():
 
 
 def get_app():
+    """
+    Initializes and configures a Flask application with JWT authentication for handling various API endpoints.
+
+    Returns:
+        Flask: The configured Flask application object.
+    """
     app = Flask(__name__)
 
+    # Configuration settings for JWT
     app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES")))
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS")))
     jwt = JWTManager(app)
 
-    app.register_blueprint(product_blueprint,        url_prefix="/product")
-    app.register_blueprint(kg_price_blueprint,       url_prefix="/kg_price")
-    app.register_blueprint(order_blueprint,          url_prefix="/order")
+    # Register blueprints for different API endpoints
+    app.register_blueprint(product_blueprint, url_prefix="/product")
+    app.register_blueprint(kg_price_blueprint, url_prefix="/kg_price")
+    app.register_blueprint(order_blueprint, url_prefix="/order")
     app.register_blueprint(product_per_kg_blueprint, url_prefix="/per_kg_product")
-    app.register_blueprint(auth_blueprint,           url_prefix="/auth")
-    app.register_blueprint(statistics_blueprint,     url_prefix="/statistics")
+    app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    app.register_blueprint(statistics_blueprint, url_prefix="/statistics")
+
     return app
 
 
-if __name__ == '__main__':
+def main():
+    """
+    Main function to run the Flask application, ensuring that default users are added if no users exist.
+
+    This script initializes and runs a Flask app with debugging enabled, as well as checks for and adds default users if there are none in the database.
+    """
     get_app().run(debug=True)
     add_default_user_if_no_users()
+
+
+if __name__ == '__main__':
+    main()

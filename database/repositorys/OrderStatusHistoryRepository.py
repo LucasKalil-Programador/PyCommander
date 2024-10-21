@@ -1,9 +1,31 @@
+"""
+Module for managing order status history in a database using MariaDB.
+
+This module contains the `OrderStatusHistoryRepository` class, which provides
+methods for performing CRUD operations on order status history records.
+It supports inserting, updating, deleting, and retrieving order status changes
+for specific restaurant orders.
+"""
 import mariadb
 
 from database import OrderStatusHistory, OrderStatus
 
 
 class OrderStatusHistoryRepository:
+    """
+        A repository class for managing order status history.
+
+        Attributes:
+            db: A database connection object.
+
+        Methods:
+            insert(history: OrderStatusHistory) -> bool: Inserts a new order status history record into the database.
+            select_by_id(history_id: int) -> OrderStatusHistory | None: Retrieves an order status history record by its ID.
+            select_by_order_id(restaurant_order_id: int) -> Generator[OrderStatusHistory, None, None]:
+                Yields order status history records for a specific restaurant order ID.
+            delete_by_id(history_id: int) -> bool: Deletes an order status history record by its ID.
+            update(history: OrderStatusHistory) -> bool: Updates an existing order status history record in the database.
+    """
     def __init__(self, db):
         self.db = db
 

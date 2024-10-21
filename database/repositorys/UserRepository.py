@@ -1,9 +1,38 @@
+"""
+Module for managing user data access in a restaurant management system.
+
+This module defines the `UserRepository` class, which provides methods for
+interacting with the `User` table in the database. It includes functionalities
+for inserting, updating, deleting, and retrieving user information.
+
+Dependencies:
+    mariadb: MariaDB connector for Python.
+    database: Imports User and UserRole classes for user management.
+"""
 import mariadb
 
 from database import User, UserRole
 
 
 class UserRepository:
+    """Repository for managing user data in the database.
+
+        This class provides methods for inserting, updating, deleting, and retrieving user
+        information from the `User` table in the database.
+
+        Attributes:
+            db (DB): An instance of the DB class for database connections.
+
+        Methods:
+            insert(user: User) -> bool: Inserts a new user into the database.
+            select_by_id(user_id: int) -> User | None: Retrieves a user by their ID.
+            select_by_username(username: str) -> User | None: Retrieves a user by their username.
+            select_all() -> Generator[User, None, None]: Retrieves all users from the database.
+            delete_by_id(user_id: int) -> bool: Deletes a user by their ID.
+            update(user: User) -> bool: Updates an existing user's information.
+            user_name_exists(username: str) -> bool: Checks if a username already exists.
+            email_exists(email: str) -> bool: Checks if an email already exists.
+    """
     def __init__(self, db):
         self.db = db
 

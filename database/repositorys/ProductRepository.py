@@ -1,9 +1,31 @@
+"""
+Module for managing product data access in a restaurant management system.
+
+This module defines the `ProductRepository` class, which provides methods for
+interacting with the `Product` table in the database. It includes functionalities
+for inserting, updating, deleting, and retrieving product information.
+
+Dependencies:
+    mariadb: MariaDB connector for Python.
+    database: Imports the Product class for product management.
+"""
 import mariadb
 
 from database import Product
 
 
 class ProductRepository:
+    """
+        A repository for managing Product records in a database.
+
+        Methods:
+            insert(product: Product) -> bool: Inserts a new product into the database.
+            select_by_id(product_id: int) -> Product | None: Retrieves a product by its ID.
+            select_all() -> Generator[Product]: Yields all products from the database.
+            select_all_paged(limit: int, offset: int) -> Generator[Product]: Yields products with pagination support.
+            delete_by_id(product_id: int) -> (bool, int): Deletes a product by its ID and returns success status and affected row count.
+            update(product: Product) -> bool: Updates an existing product's details in the database.
+    """
     def __init__(self, db):
         self.db = db
 

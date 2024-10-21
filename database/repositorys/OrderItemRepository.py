@@ -1,11 +1,31 @@
-from typing import Dict, Any, List, Tuple, TypedDict
+"""
+order_item_repository.py
 
+This module provides a repository for managing OrderItem records in a MariaDB database.
+
+Classes:
+    OrderItemRepository: Handles CRUD operations for OrderItem entries in the `OrderItem` table.
+"""
 import mariadb
 
 from database import OrderItem
 
 
 class OrderItemRepository:
+    """
+        A repository for managing OrderItem records in a MariaDB database.
+
+        Attributes:
+            db: A database connection instance.
+
+        Methods:
+            insert(order_item: OrderItem) -> bool: Inserts a new order item into the database.
+            select_by_id(order_item_id: int) -> OrderItem | None: Retrieves an order item by its ID.
+            select_all_items_special_format(order_id: int) -> tuple | None: Retrieves order items in a special format for a specific restaurant order.
+            select_by_order_id(restaurant_order_id: int): Yields all order items associated with a given restaurant order ID.
+            delete_by_id(order_item_id: int) -> bool: Deletes an order item by its ID.
+            update(order_item: OrderItem) -> bool: Updates an existing order item's details in the database.
+        """
     def __init__(self, db):
         self.db = db
 
