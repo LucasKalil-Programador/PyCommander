@@ -11,9 +11,6 @@ WORKDIR /app
 # Clona o repositório
 RUN git clone https://github.com/LucasKalil-Programador/PyCommander.git .
 
-# Copia o arquivo .env para o diretório de trabalho
-COPY .env /app/.env
-
 # Instala as dependências do projeto
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -21,4 +18,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn
 
 # Comando para iniciar a aplicação
-CMD ["gunicorn", "-w", "8", "-b", "127.0.0.1:8000", "main:app"]
+CMD ["gunicorn", "-w", "8", "-b", "0.0.0.0:8000", "main:app"]
