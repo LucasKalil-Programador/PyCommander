@@ -3,6 +3,7 @@ primeira execucao do contaiiner -> docker run --name mariadb-container -p 3306:3
 iniciar o container -> docker start mariadb-container
 executar comandos no container -> docker exec -it mariadb-container bash
 
+docker pull python:3.12
 
 git clone https://github.com/LucasKalil-Programador/PyCommander.git
 sudo apt install python3-dev build-essential libmariadb-dev libmariadb-dev-compat python3 python3-venv
@@ -11,3 +12,5 @@ source .venv/bin/activate
 python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 
+pip install gunicorn
+gunicorn -w 4 -b 127.0.0.1:8000 main:app
