@@ -52,23 +52,26 @@ def get_app():
     Returns:
         Flask: The configured Flask application object.
     """
-    app = Flask(__name__)
+    new_app = Flask(__name__)
 
     # Configuration settings for JWT
-    app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES")))
-    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS")))
-    jwt = JWTManager(app)
+    new_app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
+    new_app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_MINUTES")))
+    new_app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES_DAYS")))
+    jwt = JWTManager(new_app)
 
     # Register blueprints for different API endpoints
-    app.register_blueprint(product_blueprint, url_prefix="/product")
-    app.register_blueprint(kg_price_blueprint, url_prefix="/kg_price")
-    app.register_blueprint(order_blueprint, url_prefix="/order")
-    app.register_blueprint(product_per_kg_blueprint, url_prefix="/per_kg_product")
-    app.register_blueprint(auth_blueprint, url_prefix="/auth")
-    app.register_blueprint(statistics_blueprint, url_prefix="/statistics")
+    new_app.register_blueprint(product_blueprint, url_prefix="/product")
+    new_app.register_blueprint(kg_price_blueprint, url_prefix="/kg_price")
+    new_app.register_blueprint(order_blueprint, url_prefix="/order")
+    new_app.register_blueprint(product_per_kg_blueprint, url_prefix="/per_kg_product")
+    new_app.register_blueprint(auth_blueprint, url_prefix="/auth")
+    new_app.register_blueprint(statistics_blueprint, url_prefix="/statistics")
 
-    return app
+    return new_app
+
+
+app = get_app()
 
 
 def main():
@@ -77,7 +80,7 @@ def main():
 
     This script initializes and runs a Flask app with debugging enabled, as well as checks for and adds default users if there are none in the database.
     """
-    get_app().run(debug=True)
+    app.run(debug=True)
     add_default_user_if_no_users()
 
 
