@@ -6,6 +6,8 @@ methods to insert, update, delete, and retrieve restaurant orders from
 the database. It also includes functionality for calculating total amounts
 for orders and checking the existence of open orders by their number.
 """
+import datetime
+
 import mariadb
 
 from database import RestaurantOrder
@@ -31,6 +33,8 @@ class RestaurantOrderRepository:
             update(order: RestaurantOrder) -> bool: Updates an existing order in the database.
             exists_number_open(number: int) -> bool: Checks if an open order exists by its number.
             calc_total(order_id: int) -> float | None: Calculates the total amount for a specific order.
+            get_payment_summary(entry_date: datetime.datetime, exit_date: datetime.datetime) -> dict
+                create a summary of payment methods
     """
     def __init__(self, db):
         self.db = db
@@ -255,6 +259,79 @@ class RestaurantOrderRepository:
             return None
         except mariadb.Error as e:
             print(f"Error fetching order by ID: {e}")
+            return None
+        finally:
+            cursor.close()
+
+    def get_payment_summary(self, entry_date: datetime.datetime, exit_date: datetime.datetime):
+        cursor = self.db.conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT
+                    Payment_Method,
+                    COUNT(*) AS Count,
+                    SUM(Total_Amount) AS Total_Sum
+                FROM
+                    RestaurantOrder
+                WHERE
+                    Paid = 1
+                    AND Entry_Time BETWEEN ? AND ?
+                    AND Payment_Method IN ('Pix', 'Card', 'Cash', 'Others')
+                GROUP BY
+                    Payment_Method;
+            """, (entry_date, exit_date))
+            rows = cursor.fetchall()
+
+            if rows:
+                return [
+                        {
+                            "Payment_Method": row[0],
+                            "Count": row[1],
+                            "Total_Sum": row[2]
+                        } for row in rows
+                    ]
+            return None
+        except mariadb.Error as e:
+            print(f"Error fetching payment summary: {e}")
+            return None
+        finally:
+            cursor.close()
+
+    def get_order_stats(self, entry_date: datetime.datetime, exit_date: datetime.datetime):
+        cursor = self.db.conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT
+                    SUM(Total_Amount) AS Total_Sum,
+                    AVG(Total_Amount) AS Average_Amount,
+                    MAX(Total_Amount) AS Max_Amount,
+                    MIN(Total_Amount) AS Min_Amount,
+                    SUM(TIMESTAMPDIFF(SECOND, Entry_Time, Exit_Time)) AS Total_Duration_Seconds,
+                    AVG(TIMESTAMPDIFF(SECOND, Entry_Time, Exit_Time)) AS Average_Duration_Seconds,
+                    MAX(TIMESTAMPDIFF(SECOND, Entry_Time, Exit_Time)) AS Max_Duration_Seconds,
+                    MIN(TIMESTAMPDIFF(SECOND, Entry_Time, Exit_Time)) AS Min_Duration_Seconds
+                FROM
+                    RestaurantOrder
+                WHERE
+                    Paid = 1
+                    AND Entry_Time BETWEEN ? AND ?;
+            """, (entry_date, exit_date))
+            row = cursor.fetchone()
+
+            if row:
+                return {
+                    "Total_Sum": row[0],
+                    "Average_Amount": row[1],
+                    "Max_Amount": row[2],
+                    "Min_Amount": row[3],
+                    "Total_Duration_Seconds": row[4],
+                    "Average_Duration_Seconds": row[5],
+                    "Max_Duration_Seconds": row[6],
+                    "Min_Duration_Seconds": row[7]
+                }
+            return None
+        except mariadb.Error as e:
+            print(f"Error fetching order statistics: {e}")
             return None
         finally:
             cursor.close()

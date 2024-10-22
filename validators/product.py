@@ -1,3 +1,33 @@
+"""
+This module provides a set of decorators to validate incoming JSON request data in a Flask application.
+
+The decorators ensure that specific fields in the JSON body adhere to expected types and formats before proceeding with the associated function. Validations are categorized into required and optional fields, ensuring robust error handling for various input scenarios.
+
+### Required Decorators:
+1. **require_name**: Validates that the `name` field is a string containing 1 to 255 alphanumeric characters.
+2. **require_price**: Checks that the `price` field is a float greater than zero.
+3. **require_stock**: Ensures that the `stock` field is an integer greater than or equal to zero.
+4. **required_category**: Validates that the `category` field is a string containing 1 to 255 alphanumeric characters.
+5. **require_id**: Checks that the `id` field is an integer.
+6. **require_kg_price_id**: Validates that the `kg_price_id` field is an integer.
+7. **require_weight**: Ensures that the `weight` field is a float greater than zero.
+
+### Optional Decorators:
+1. **optional_weight**: If provided, validates that the `weight` field is a float greater than zero.
+2. **optional_name**: If provided, checks that the `name` field is a string containing 1 to 255 alphanumeric characters.
+3. **optional_kg_price_id**: If provided, validates that the `kg_price_id` field is an integer.
+4. **optional_active**: Checks that the `active` field is a boolean, defaulting to `False`.
+5. **optional_category**: If provided, validates that the `category` field is a string containing 0 to 255 alphanumeric characters.
+6. **optional_stock**: If provided, checks that the `stock` field is an integer greater than or equal to zero.
+7. **optional_quantity**: If provided, validates that the `quantity` field is an integer greater than zero, defaulting to `1`.
+8. **optional_description**: If provided, validates that the `description` field is a string containing 0 to 255 alphanumeric characters.
+9. **optional_price**: If provided, checks that the `price` field is a float greater than zero.
+
+### Error Handling:
+Each decorator returns a JSON response with an appropriate error message and a status code of `401` if validation fails. If all checks are passed, control is transferred to the wrapped function.
+
+Usage of these decorators facilitates the management of input data integrity, promoting a cleaner and more maintainable codebase.
+"""
 import re
 from flask import request, jsonify
 

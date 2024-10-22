@@ -1,3 +1,31 @@
+"""
+This module defines a set of endpoints for managing products in a Flask application.
+It allows users to create, update, retrieve, and delete products. Access to these endpoints
+is restricted based on user roles, ensuring that only authorized users can make changes to
+the product database.
+
+Endpoints:
+- POST   /product/create: Create a new product (Admin access required).
+- POST   /product/update: Update an existing product (Admin access required).
+- DELETE /product/delete: Delete a product (Admin access required).
+- GET    /product/get:    Retrieve a paginated list of products (Admin, Cashier, Waiter, Cook access required).
+
+Dependencies:
+- Flask: For routing and handling HTTP requests.
+- Database module: For accessing and managing product data in the repository.
+- Utilities: For handling HTTP status codes and role-based access control.
+- Validators: For validating input data related to products.
+
+Usage:
+1. Initialize the Blueprint in your Flask app.
+2. Ensure that appropriate user roles are enforced for each endpoint using the role_required decorator.
+3. Utilize the provided validators to validate product data when creating or updating products.
+4. Implement pagination for the product retrieval endpoint to manage large datasets efficiently.
+
+Notes:
+- Ensure that the database and repository methods used for product management are correctly defined
+  in the database module to handle CRUD operations effectively.
+"""
 from flask import Blueprint, jsonify, request
 
 from database import *
@@ -75,7 +103,7 @@ def delete_product():
     status, rowcount = db.product_repository.delete_by_id(int(request.json.get('id')))
     if status:
         if rowcount <= 0:
-            return jsonify(success="Product not found."), HttpStatus.NOT_FOUND.value
+            return jsonify(error="Product not found."), HttpStatus.NOT_FOUND.value
         return jsonify(success="Product delete successfully."), HttpStatus.OK.value
 
     return jsonify(error="Product delete error"), HttpStatus.INTERNAL_SERVER_ERROR.value

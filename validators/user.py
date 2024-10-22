@@ -1,11 +1,32 @@
+"""
+This module defines a series of decorators that validate incoming JSON request data for user-related attributes in a Flask application.
+
+Decorators:
+- `require_name`: Ensures the 'name' attribute is a valid string between 1 and 255 characters, containing only allowed characters (letters, digits, underscores, spaces).
+- `require_email`: Validates that the 'email' attribute is a properly formatted string and does not exceed 255 characters.
+- `require_username`: Validates that the 'username' attribute is a valid string between 1 and 255 characters, matching allowed characters.
+- `require_password`: Ensures the 'password' attribute is a valid string with at least 8 characters.
+- `require_active`: Validates that the 'active' attribute is a boolean value.
+- `require_user_role`: Ensures the 'user_role' attribute is a valid string matching predefined user roles in the `UserRole` enumeration.
+
+Optional Decorators:
+- `optional_name`: Validates 'name' if provided, ensuring it meets the same criteria as `require_name`.
+- `optional_email`: Validates 'email' if provided, ensuring it meets the same criteria as `require_email`.
+- `optional_password`: Validates 'password' if provided, ensuring it meets the same criteria as `require_password`.
+- `optional_active`: Validates 'active' if provided, ensuring it meets the same criteria as `require_active`.
+- `optional_user_role`: Validates 'user_role' if provided, ensuring it meets the same criteria as `require_user_role`.
+- `optional_new_username`: Validates 'new_username' if provided, ensuring it meets the same criteria as `require_username`.
+
+Each decorator returns a JSON response with an error message and a status code of 401 if the validation fails. If validation passes, the decorated function is called with the original arguments.
+"""
 import re
-from functools import wraps
-
 from flask import jsonify, request
-
 from database import UserRole
 
 
+# region require
+
+# Ensures 'name' is a valid string between 1 and 255 characters, matching allowed characters
 def require_name(func):
     def wrapper(*args, **kwargs):
         name = request.json.get('name')
@@ -22,6 +43,7 @@ def require_name(func):
     return wrapper
 
 
+# Ensures 'email' is a valid string format and does not exceed 255 characters
 def require_email(func):
     def wrapper(*args, **kwargs):
         email = request.json.get('email')
@@ -38,6 +60,7 @@ def require_email(func):
     return wrapper
 
 
+# Ensures 'username' is a valid string between 1 and 255 characters, matching allowed characters
 def require_username(func):
     def wrapper(*args, **kwargs):
         username = request.json.get('username')
@@ -54,6 +77,7 @@ def require_username(func):
     return wrapper
 
 
+# Ensures 'password' is a valid string with at least 8 characters
 def require_password(func):
     def wrapper(*args, **kwargs):
         password_raw = request.json.get('password')
@@ -70,6 +94,7 @@ def require_password(func):
     return wrapper
 
 
+# Ensures 'active' is a valid boolean value
 def require_active(func):
     def wrapper(*args, **kwargs):
         active = request.json.get('active')
@@ -86,12 +111,13 @@ def require_active(func):
     return wrapper
 
 
+# Ensures 'user_role' is a valid string and matches defined user roles
 def require_user_role(func):
     def wrapper(*args, **kwargs):
         user_role = request.json.get('user_role')
 
         if not isinstance(user_role, str):
-            return jsonify(error=f"Invalid password type, expected string got {type(user_role)}."), 401
+            return jsonify(error=f"Invalid user role type, expected string got {type(user_role)}."), 401
 
         if user_role not in [r.value for r in UserRole]:
             return jsonify(error="Invalid user role."), 401
@@ -102,6 +128,12 @@ def require_user_role(func):
     return wrapper
 
 
+# endregion
+
+# region optional
+
+
+# Ensures 'name', if provided, is a valid string between 1 and 255 characters, matching allowed characters
 def optional_name(func):
     def wrapper(*args, **kwargs):
         name = request.json.get('name', None)
@@ -120,6 +152,7 @@ def optional_name(func):
     return wrapper
 
 
+# Ensures 'email', if provided, is a valid string format and does not exceed 255 characters
 def optional_email(func):
     def wrapper(*args, **kwargs):
         email = request.json.get('email', None)
@@ -139,6 +172,7 @@ def optional_email(func):
     return wrapper
 
 
+# Ensures 'password', if provided, is a valid string with at least 8 characters
 def optional_password(func):
     def wrapper(*args, **kwargs):
         password_raw = request.json.get('password', None)
@@ -158,6 +192,7 @@ def optional_password(func):
     return wrapper
 
 
+# Ensures 'active', if provided, is a valid boolean value
 def optional_active(func):
     def wrapper(*args, **kwargs):
         active = request.json.get('active', None)
@@ -177,6 +212,7 @@ def optional_active(func):
     return wrapper
 
 
+# Ensures 'user_role', if provided, is a valid string and matches defined user roles
 def optional_user_role(func):
     def wrapper(*args, **kwargs):
         user_role = request.json.get('user_role', None)
@@ -185,7 +221,7 @@ def optional_user_role(func):
             return func(*args, **kwargs)
 
         if not isinstance(user_role, str):
-            return jsonify(error=f"Invalid password type, expected string got {type(user_role)}."), 401
+            return jsonify(error=f"Invalid user role type, expected string got {type(user_role)}."), 401
 
         if user_role not in [r.value for r in UserRole]:
             return jsonify(error="Invalid user role."), 401
@@ -196,6 +232,7 @@ def optional_user_role(func):
     return wrapper
 
 
+# Ensures 'new_username', if provided, is a valid string between 1 and 255 characters, matching allowed characters
 def optional_new_username(func):
     def wrapper(*args, **kwargs):
         username = request.json.get('new_username', None)
@@ -213,3 +250,5 @@ def optional_new_username(func):
 
     wrapper.__name__ = func.__name__
     return wrapper
+
+# endregion

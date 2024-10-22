@@ -1,7 +1,25 @@
+"""
+This module contains several decorators to validate incoming JSON request data in a Flask application.
+
+The decorators ensure that specific fields in the JSON body adhere to expected types and formats before proceeding with the associated function. The validations include checks for required fields (e.g., `order_number`, `order_id`, and `payment_method`) and optional fields (e.g., `note`, `product_id`, `product_per_kg_id`).
+
+The following decorators are defined:
+
+1. **require_number**: Ensures that `order_number` is a valid integer greater than zero.
+2. **require_order_id**: Validates that `order_id` is an integer.
+3. **require_payment**: Checks that `payment_method` is a string and matches a predefined list of payment methods.
+4. **optional_note**: Validates that `note`, if provided, is a string with a maximum of 255 alphanumeric characters.
+5. **optional_product_id**: Ensures that `product_id`, if provided, is an integer.
+6. **optional_product_per_kg_id**: Validates that `product_per_kg_id`, if provided, is an integer.
+
+Each decorator returns a JSON response with an appropriate error message if validation fails, and it passes control to the wrapped function if all checks are passed.
+"""
 import re
 from flask import request, jsonify
-
 from database import PaymentMethod
+
+
+# region require
 
 
 # Ensures 'order_number' is a valid integer (> 0)
@@ -52,6 +70,10 @@ def require_payment(func):
     return wrapper
 
 
+# endregion
+
+# region optional
+
 # Ensures 'note' is an optional string up to 255 alphanumeric characters
 def optional_note(func):
     def wrapper(*args, **kwargs):
@@ -99,3 +121,5 @@ def optional_product_per_kg_id(func):
 
     wrapper.__name__ = func.__name__
     return wrapper
+
+# endregion

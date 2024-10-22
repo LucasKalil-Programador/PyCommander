@@ -1,3 +1,27 @@
+"""
+This module provides authentication endpoints for user management within a Flask application.
+It uses JSON Web Tokens (JWT) for secure user login and access management, allowing for
+features such as user registration, login, editing, deletion, and retrieval of user information.
+
+Endpoints:
+- POST   /auth/login:    Authenticate a user and return access and refresh tokens.
+- POST   /auth/refresh:  Refresh the access token using a valid refresh token.
+- POST   /auth/register: Register a new user (Admin access required).
+- POST   /auth/edit:     Edit user details (Admin access required).
+- DELETE /auth/delete:   Delete a user by username (Admin access required).
+- GET    /auth/get:      Retrieve all users (Admin access required).
+
+Dependencies:
+- Flask: For web routing and handling requests.
+- Flask-JWT-Extended: For creating and verifying JWTs.
+- Database module: For accessing user and JWT repositories.
+- Utilities: For password hashing and validation.
+- Validators: For input validation of user data.
+
+Usage:
+1. Initialize the Blueprint in your Flask app.
+2. Ensure the necessary user roles and permissions are enforced for sensitive operations.
+"""
 from datetime import datetime, timedelta
 
 from flask import jsonify, request, Blueprint
@@ -6,10 +30,6 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from database import *
 from utils import generate_bcrypt_hash, verify_bcrypt_password, role_required, HttpStatus
 from validators import user
-
-# /auth/login    POST
-# /auth/refresh  POST
-# /auth/register DELETE Admin
 
 auth_blueprint = Blueprint('auth', __name__)
 

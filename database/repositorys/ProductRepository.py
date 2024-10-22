@@ -25,6 +25,9 @@ class ProductRepository:
             select_all_paged(limit: int, offset: int) -> Generator[Product]: Yields products with pagination support.
             delete_by_id(product_id: int) -> (bool, int): Deletes a product by its ID and returns success status and affected row count.
             update(product: Product) -> bool: Updates an existing product's details in the database.
+            get_product_summary() -> tuple: Retrieves a summary of the products in the database,
+                                      including the total value of products in stock
+                                      and the total count of products.
     """
     def __init__(self, db):
         self.db = db
@@ -146,5 +149,23 @@ class ProductRepository:
             print(f"Error updating product: {e}")
             self.db.conn.rollback()
             return False
+        finally:
+            cursor.close()
+
+    def get_product_summary(self):
+        cursor = self.db.conn.cursor()
+        try:
+            cursor.execute("""
+                SELECT SUM(Price * Stock), COUNT(*)
+                FROM Product
+            """)
+            result = cursor.fetchone()
+            if result:
+                total_value = result[0] if result[0] is not None else 0
+                total_count = result[1] if result[1] is not None else 0
+                return total_value, total_count
+            return 0, 0
+        except mariadb.Error as e:
+            print(f"Error fetching product summary: {e}")
         finally:
             cursor.close()

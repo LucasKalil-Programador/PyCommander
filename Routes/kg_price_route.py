@@ -1,14 +1,31 @@
+"""
+This module provides endpoints for managing kilogram price records within a Flask application.
+It allows for the creation, updating, deletion, and retrieval of prices associated with specific
+categories, primarily intended for use by administrative and operational staff.
+
+Endpoints:
+- POST   /kg_price/create: Create a new kilogram price (Admin access required).
+- POST   /kg_price/update: Update an existing kilogram price (Admin access required).
+- DELETE /kg_price/delete: Delete a kilogram price by its ID (Admin access required).
+- GET    /kg_price/get:    Retrieve kilogram prices (Admin, Cashier, Waiter, and Cook access required).
+
+Dependencies:
+- Flask: For web routing and handling requests.
+- Database module: For accessing kilogram price repositories.
+- Utilities: For handling HTTP status codes and role-based access.
+- Validators: For input validation related to product data.
+
+Usage:
+1. Initialize the Blueprint in your Flask app.
+2. Ensure that appropriate user roles are enforced for sensitive operations.
+3. Handle pagination for the retrieval of kilogram prices as needed.
+"""
 from flask import Blueprint, jsonify, request
 
 from database import *
 from utils import HttpStatus, role_required
 from validators import product, utils
 from database import db
-
-# /kg_price/create POST   Admin
-# /kg_price/update POST   Admin
-# /kg_price/delete DELETE Admin
-# /kg_price/get    GET    Admin, Cashier, Waiter, Cook
 
 kg_price_blueprint = Blueprint('kg_price', __name__)
 

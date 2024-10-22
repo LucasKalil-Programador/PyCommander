@@ -1,3 +1,30 @@
+"""
+This module provides a set of endpoints for managing restaurant orders within a Flask application.
+It allows users to check in orders, add items to orders, check out orders, and retrieve order totals
+and item lists. The endpoints are accessible to users with specific roles, such as Admin, Cashier,
+Waiter, and Cook.
+
+Endpoints:
+- POST /order/checkin:       Check in a new order (Admin, Cashier, Waiter access required).
+- POST /order/add_item:      Add an item to an existing order (Admin, Cashier, Waiter access required).
+- POST /order/checkout:      Process the checkout for an order (Admin, Cashier, Waiter access required).
+- GET  /order/total:         Retrieve the total amount for an order (Admin, Cashier, Waiter access required).
+- GET  /order/items:         Get the list of items in an order (Admin, Cashier, Waiter, Cook access required).
+- GET  /order/open_orders:   Retrieve a paginated list of open orders (Admin, Cashier, Waiter, Cook access required).
+- GET  /order/closed_orders: Retrieve a paginated list of closed orders (Admin, Cashier, Waiter, Cook access required).
+
+Dependencies:
+- Flask: For web routing and handling HTTP requests.
+- Database module: For accessing order repositories and managing order data.
+- Utilities: For handling HTTP status codes and role-based access control.
+- Validators: For validating input data related to orders and products.
+
+Usage:
+1. Initialize the Blueprint in your Flask app.
+2. Ensure that appropriate user roles are enforced for each endpoint.
+3. Handle pagination for open and closed order retrieval as necessary.
+4. Utilize the provided validators to ensure data integrity for order processing.
+"""
 from datetime import datetime
 
 from flask import jsonify, request, Blueprint
@@ -5,14 +32,6 @@ from flask import jsonify, request, Blueprint
 from database import *
 from utils import HttpStatus, role_required
 from validators import order, product, utils
-
-# /order/checkin       POST   ADMIN, CASHIER, WAITER
-# /order/add_item      POST   ADMIN, CASHIER, WAITER
-# /order/checkout      POST   ADMIN, CASHIER, WAITER
-# /order/total         GET    ADMIN, CASHIER, WAITER
-# /order/items         GET    ADMIN, CASHIER, WAITER, COOK
-# /order/open_orders   GET    ADMIN, CASHIER, WAITER, COOK
-# /order/closed_orders GET    ADMIN, CASHIER, WAITER, COOK
 
 order_blueprint = Blueprint('order', __name__)
 
@@ -99,7 +118,11 @@ def add_item():
             product_id=order_product.id
         )
         if db.order_item_repository.insert(order_item):
-            return jsonify(success="Product added successfully", new_item=order_item), HttpStatus.OK.value
+            order_product.stock -= order_item.quantity
+            if db.product_repository.update(order_product):
+                return jsonify(success="Product added successfully and product updated", new_item=order_item), HttpStatus.OK.value
+            else:
+                return jsonify(success="Product added successfully", new_item=order_item), HttpStatus.OK.value
     elif product_per_kg_id is not None:
         order_product_per_kg = db.product_per_kg_repository.select_by_id(product_per_kg_id)
         if order_product_per_kg is None:

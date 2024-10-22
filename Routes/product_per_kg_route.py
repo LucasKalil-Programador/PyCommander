@@ -1,3 +1,26 @@
+"""
+This module defines a set of endpoints for managing products sold by kilogram within a Flask application.
+It allows users to create, update, retrieve, and delete products that are priced based on weight.
+The endpoints are accessible to users with specific roles, including Admin, Cashier, Waiter, and Cook.
+
+Endpoints:
+- POST   /product_per_kg/create: Create a new product priced per kilogram (Admin, Cashier, Waiter, Cook access required).
+- POST   /product_per_kg/update: Update an existing product priced per kilogram (Admin access required).
+- DELETE /product_per_kg/delete: Delete a product priced per kilogram (Admin access required).
+- GET    /product_per_kg/get:    Retrieve a paginated list of products priced per kilogram (Admin, Cashier, Waiter, Cook access required).
+
+Dependencies:
+- Flask: For routing and handling HTTP requests.
+- Database module: For accessing and managing product data in the repository.
+- Utilities: For handling HTTP status codes and role-based access control.
+- Validators: For validating input data related to products.
+
+Usage:
+1. Initialize the Blueprint in your Flask app.
+2. Ensure that appropriate user roles are enforced for each endpoint.
+3. Use the provided validators to ensure the integrity of product data when creating or updating.
+4. Implement pagination for the product retrieval endpoint to manage large datasets efficiently.
+"""
 from flask import Blueprint
 from flask import jsonify, request
 
@@ -9,7 +32,6 @@ from validators import product, utils
 # /product_per_kg/update POST   Admin
 # /product_per_kg/delete DELETE Admin
 # /product_per_kg/get    GET    Admin, Cashier, Waiter, Cook
-# region /product per kg
 
 product_per_kg_blueprint = Blueprint('product_per_kg', __name__)
 
