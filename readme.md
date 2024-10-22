@@ -14,3 +14,6 @@ pip install -r requirements.txt
 
 pip install gunicorn
 gunicorn -w 4 -b 127.0.0.1:8000 main:app
+
+docker build -t py_commander_app .
+docker run --rm -p 8000:8000 py_commander_app
